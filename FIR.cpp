@@ -88,13 +88,30 @@ void GoImp(int y,int x,int imp[height][width],int board[height][width]) {
     }
 
     imp[y][x] = abs(sum_x) + abs(sum_y) + abs(sum_z);
+    for (int z = 0;y-z>=0; z++) {
+        if (y-z > 0) {
+            if (board[y-z - 1][x] != 0 || board[y+z + 1][x] != 0 || board[y+z + 1][x+z + 1] != 0) {
+                imp[y][x]++;
+            }
+        }
+        if (x-z > 0) {
+            if (board[y][x - z - 1] != 0 || board[y][x+z + 1] != 0 || board[y+z + 1][x+z + 1] != 0) {
+                imp[y][x]++;
+            }
+        }
+        if (y-z > 0 && x-z > 0) {
+            if (board[y-z - 1][x-z - 1] != 0) {
+                imp[y][x]++;
+            }
+        }
+    }
 }
 void Computer(int board[height][width], int imp[height][width]) {
     Index index = {0,0,0};//用以标记权重最大的位置
     //根据数值来进行imp赋值，越小或越大imp越大，优先越大出棋
     
-    for (int i = 0; i < height-4; i++) {
-        for (int j = 0; j < width-4; j++) {
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
             
                 GoImp( i, j, imp,board);
         }
