@@ -39,12 +39,22 @@ int IsWin(int board[height][width]) {
     int sum_x = 0;//玩家win和为5，机器为-5
     int sum_y = 0;
     int sum_z = 0;
-    for (int i = 0; i < height-4; i++) {//横向判断是否win
-        for (int j = 0; j < width-4; j++) {
+    for (int i = 0; i < height; i++) {//横向判断是否win
+        for (int j = 0; j < width; j++) {
+            sum_x = 0;
+            sum_y = 0;
+            sum_z = 0;
             for (int z = 0; z < 5; z++) {
-                sum_x += board[i][j+z];//横向
-                sum_y += board[i+z][j];//纵向
-                sum_z += board[i + z][j + z];//斜向
+                if (j + z >= 0&&j+z<width) {
+                    sum_x += board[i][j + z];//横向
+                }
+
+                if (i + z >= 0&&i+z<height) {
+                    sum_y += board[i + z][j];//纵向
+                }
+                if (j + z >= 0 && i + z >= 0&&j+z<width&&i+z<height) {
+                    sum_z += board[i + z][j + z];//斜向
+                }
             }
             if (sum_x == 5 || sum_y == 5 || sum_z == 5) {
                 //玩家win
@@ -58,19 +68,21 @@ int IsWin(int board[height][width]) {
     }
     return 0;
 }
-void GoImp(int sum_x,int sum_y,int sum_z,int y,int x,int imp[height][width],int board[height][width]) {
+void GoImp(int y,int x,int imp[height][width],int board[height][width]) {
     //权重计算并赋值,将八个方向的数值相加
-
+    int sum_x = 0;
+    int sum_y = 0;
+    int sum_z = 0;
     for (int z = -5; z < 5; z++) {
         
-        if (x + z >= 0) {
+        if (x + z >= 0 && x + z < width ) {
             sum_x += abs(board[y][x + z]);//横向
         }
         
-        if (y + z >= 0) {
+        if (y + z >= 0 && y + z < height) {
             sum_y += abs(board[y + z][x]);//纵向
         }
-        if (x + z >= 0 && y + z >= 0) {
+        if (x + z >= 0 && y + z >= 0 && x + z < width && y + z < height) {
             sum_z += abs(board[y + z][x + z]);//斜向
         }
     }
@@ -79,13 +91,12 @@ void GoImp(int sum_x,int sum_y,int sum_z,int y,int x,int imp[height][width],int 
 }
 void Computer(int board[height][width], int imp[height][width]) {
     Index index = {0,0,0};//用以标记权重最大的位置
-    int sum_x = 0;//根据数值来进行imp赋值，越小或越大imp越大，优先越大出棋
-    int sum_y = 0;
-    int sum_z = 0;
+    //根据数值来进行imp赋值，越小或越大imp越大，优先越大出棋
+    
     for (int i = 0; i < height-4; i++) {
         for (int j = 0; j < width-4; j++) {
             
-                GoImp(sum_x, sum_y, sum_z, i, j, imp,board);
+                GoImp( i, j, imp,board);
         }
     }
     for (int i = 0; i < height; i++) {
@@ -123,6 +134,7 @@ int main()
         board[y][x] = 1;
 
         system("cls");
+        
         //机器出棋
         Computer(board,imp);
 
