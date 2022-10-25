@@ -12,10 +12,60 @@ struct Index
     int x;
     int y;
 };
-void PrintBoard(int board[height][width]);
-int IsWin(int board[height][width]);
-void GetImp(int y, int x, int imp[height][width], int board[height][width]);
-void Computer(int board[height][width], int imp[height][width]);
+void PrintBoard(int board[height][width]);//打印棋盘
+int IsWin(int board[height][width]);//是否输赢
+int MaxOf(int, int, int, int, int, int, int, int);//取出八方权值的最大值
+void GetImp(int y, int x, int imp[height][width], int board[height][width]);//计算权值
+void Computer(int board[height][width], int imp[height][width]);//ai出棋
+int main()
+{
+    int ret = -2;
+    int y = 0, x = 0;
+    int board[height][width] = { 0 };
+    int imp[height][width] = { 0 };
+    while (true)
+    {
+        PrintBoard(board);
+        printf("出棋位置:");
+        scanf_s("%d %d", &x, &y);
+        x -= 1;
+        y -= 1;
+        if (x > 17 || y > 9 || x < 0 || y < 0 || board[y][x] != 0) {
+            printf("超出范围或已被占用");
+            Sleep(500);
+            system("cls");
+            continue;
+        }
+        board[y][x] = 1;
+
+        system("cls");
+
+        //机器出棋
+        Computer(board, imp);
+
+        {
+            for (int i = 0; i < height; i++) {
+                for (int j = 0; j < width; j++) {
+                    printf("%d", imp[i][j]);
+                }
+                printf("\n");
+            }
+        }
+
+        ret = IsWin(board);
+        if (ret == 1) {
+            printf("you win");
+            return 0;
+        }
+        else if (ret == -1) {
+            printf("you lose");
+            return 0;
+        }
+    }
+
+
+}
+
 void PrintBoard(int board[height][width]) {//打印棋盘
     printf("18*9\n");
     for (int i = 0; i < height; i++) {
@@ -72,13 +122,29 @@ int IsWin(int board[height][width]) {
     }
     return 0;
 }
+int MaxOf(int sum_up ,int sum_down ,int sum_left ,int sum_right ,int sum_UpRight ,int sum_UpLeft ,int sum_DownRight ,int sum_DownLeft) {
+    int nums = 8;
+    int max = 0;
+    int t[8] = { sum_up , sum_down , sum_left , sum_right , sum_UpRight , sum_UpLeft , sum_DownRight , sum_DownLeft };
+    for (int i = 0; i < nums; i++) {
+        if (max < t[i]) {
+            max = t[i];
+        }
+    }
+    return max;
+}
 void GetImp(int y,int x,int imp[height][width],int board[height][width]) {
-    //权重计算,八方相加
+    
+    //权值计算,八方相加
     int color = -3;
     int sum_left = 0;
     int sum_right = 0;
     int sum_up = 0;
     int sum_down = 0;
+    int sum_UpLeft = 0;
+    int sum_UpRight = 0;
+    int sum_DownLeft = 0;
+    int sum_DownRight = 0;
     //计算左方的权值
     for (int i = 1;x-i>=0; i++) {
         if (board[y][x - i] == 0) {//相邻为空
@@ -121,24 +187,83 @@ void GetImp(int y,int x,int imp[height][width],int board[height][width]) {
         }
     }
     //计算下方的权值
-
+    color = -3;
+    for (int i = 1; y + i < height; i++) {
+        if (board[y + i][x] == 0) {//相邻为空
+            break;
+        }
+        else if (board[y + i][x] == color || color == -3) {//相邻相同颜色的棋子
+            color = board[y + i][x];
+            sum_down++;
+        }
+        else {//遇到颜色不同的棋子
+            break;
+        }
+    }
     //计算左上方的权值
-
+    color = -3;
+    for (int i = 1; y - i >= 0&&x-i>=0; i++) {
+        if (board[y - i][x-i] == 0) {//相邻为空
+            break;
+        }
+        else if (board[y - i][x-i] == color || color == -3) {//相邻相同颜色的棋子
+            color = board[y - i][x-i];
+            sum_UpLeft++;
+        }
+        else {//遇到颜色不同的棋子
+            break;
+        }
+    }
     //计算左下方的权值
-
+    color = -3;
+    for (int i = 1; y + i < height && x - i >= 0; i++) {
+        if (board[y + i][x - i] == 0) {//相邻为空
+            break;
+        }
+        else if (board[y + i][x - i] == color || color == -3) {//相邻相同颜色的棋子
+            color = board[y + i][x-i];
+            sum_DownLeft++;
+        }
+        else {//遇到颜色不同的棋子
+            break;
+        }
+    }
     //计算右上方的权值
-
+    color = -3;
+    for (int i = 1; y - i >= 0 && x + i < width; i++) {
+        if (board[y - i][x + i] == 0) {//相邻为空
+            break;
+        }
+        else if (board[y - i][x + i] == color || color == -3) {//相邻相同颜色的棋子
+            color = board[y - i][x+i];
+            sum_UpRight++;
+        }
+        else {//遇到颜色不同的棋子
+            break;
+        }
+    }
     //计算右下方的权值
-
-
-    memset(imp, 0, sizeof(imp));
-    
+    color = -3;
+    for (int i = 1; y + i < height && x + i < width; i++) {
+        if (board[y + i][x + i] == 0) {//相邻为空
+            break;
+        }
+        else if (board[y + i][x + i] == color || color == -3) {//相邻相同颜色的棋子
+            color = board[y + i][x + i];
+            sum_DownRight++;
+        }
+        else {//遇到颜色不同的棋子
+            break;
+        }
+    }
+    imp[y][x] = MaxOf(sum_up, sum_down, sum_left, sum_right, sum_UpRight, sum_UpLeft, sum_DownRight, sum_DownLeft);
 }
 void Computer(int board[height][width], int imp[height][width]) {
-    Index index = {0,0,0};//用以标记权重最大的位置
+    Index index = {0,0,0};//用以标记权值最大的位置
     //根据imp权值下棋
-    
-    for (int i = 0; i < height; i++) {
+    //首先初始化imp数组
+    memset(imp, 0, sizeof(imp));
+    for (int i = 0; i < height; i++) {//遍历计算权值
         for (int j = 0; j < width; j++) {
             if (board[i][j] == 0) {//该位置为空，计算权值
                 GetImp(i, j, imp, board);
@@ -147,62 +272,15 @@ void Computer(int board[height][width], int imp[height][width]) {
     }
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
-            //遍历权重后选取最高的位置出棋
-            if (imp[i][j] > index.imp) {
+            //遍历权值后选取权值最高的位置
+            if (imp[i][j] > index.imp&&board[i][j]==0) {
                 index.imp = imp[i][j];
                 index.y = i;
                 index.x = j;
             }
         }
     }
+    cout << "y x" << index.y+1 << " " << index.x+1 << endl;
     board[index.y][index.x] = -1;//下棋
-}
-int main()
-{
-    int ret = -2;
-    int y=0, x=0;
-    int board[height][width] = { 0 };
-    int imp[height][width] = { 0 };
-    while (true)
-    {
-        PrintBoard(board);
-        printf("出棋位置:");
-        scanf_s("%d %d", &x, &y);
-        x -= 1;
-        y -= 1;
-        if (x > 17 || y > 9 || x < 0 || y < 0||board[y][x]!=0) {
-            printf("超出范围或已被占用");
-            Sleep(500);
-            system("cls");
-            continue;
-        }
-        board[y][x] = 1;
-
-        system("cls");
-        
-        //机器出棋
-        Computer(board,imp);
-
-        {
-            for (int i = 0; i < height; i++) {
-                for (int j = 0; j < width; j++) {
-                    printf("%d",imp[i][j]);
-                }
-                printf("\n");
-            }
-        }
-
-        ret = IsWin(board);
-        if (ret == 1) {
-            printf("you win");
-            return 0;
-        }
-        else if (ret == -1) {
-            printf("you lose");
-            return 0;
-        }
-    }
-    
-    
 }
 
