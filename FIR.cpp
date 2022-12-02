@@ -1,22 +1,12 @@
 ﻿//使用二维数组构建棋盘 1为玩家，-1为计算机，0为空
-//使用imp数组判断比重实现简单机器下棋
+//使用imp数组判断权重实现简单机器下棋
 #include <iostream>
 #include<Windows.h>
 #include<conio.h>
+#include"def.h"
 using namespace std;
-const int width = 18;
-const int height = 9;
-struct Index
-{
-    int imp;
-    int x;
-    int y;
-};
-void PrintBoard(int board[height][width]);//打印棋盘
-int IsWin(int board[height][width]);//是否输赢
-int MaxOf(int, int, int, int, int, int, int, int);//取出八方权值的最大值
-void GetImp(int y, int x, int imp[height][width], int board[height][width]);//计算权值
-void Computer(int board[height][width], int imp[height][width]);//ai出棋
+
+
 int main()
 {
     int ret = -2;
@@ -43,14 +33,14 @@ int main()
         //机器出棋
         Computer(board, imp);
 
-        {
+        /*{
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
                     printf("%d", imp[i][j]);
                 }
                 printf("\n");
             }
-        }
+        }*/
 
         ret = IsWin(board);
         if (ret == 1) {
@@ -59,6 +49,10 @@ int main()
         }
         else if (ret == -1) {
             printf("you lose");
+            return 0;
+        }
+        else if (ret == 3) {
+            printf("no win");
             return 0;
         }
     }
@@ -93,11 +87,13 @@ int IsWin(int board[height][width]) {
     int sum_x = 0;//玩家win和为5，机器为-5
     int sum_y = 0;
     int sum_z = 0;
+    int c = 3;//判断平局
     for (int i = 0; i < height; i++) {//横向判断是否win
         for (int j = 0; j < width; j++) {
             sum_x = 0;
             sum_y = 0;
             sum_z = 0;
+            c = board[i][j];
             for (int z = 0; z < 5; z++) {
                 if (j + z >= 0&&j+z<width) {
                     sum_x += board[i][j + z];//横向
@@ -112,13 +108,19 @@ int IsWin(int board[height][width]) {
             }
             if (sum_x == 5 || sum_y == 5 || sum_z == 5) {
                 //玩家win
+                getchar();
                 return 1;
             }
             else if (sum_x == -5 || sum_y == -5 || sum_z == -5) {
                 //机器win
+                getchar();
                 return -1;
             }
         }
+    }
+    if(c!=1||c!=-1){
+        //平局
+        return 3;
     }
     return 0;
 }
@@ -135,7 +137,7 @@ int MaxOf(int sum_up ,int sum_down ,int sum_left ,int sum_right ,int sum_UpRight
 }
 void GetImp(int y,int x,int imp[height][width],int board[height][width]) {
     
-    //权值计算,八方相加
+    //权值计算，取最大值
     int color = -3;
     int sum_left = 0;
     int sum_right = 0;
